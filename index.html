@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Seller Role Advisor</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F8F8F6; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    const questions = [
+      { id: "multi_warehouse", text: "Does this seller operate multiple warehouse locations?", hint: "1 of 4" },
+      { id: "need_sp_access", text: "Does the seller need users who can view and accept offers in the Seller Portal?", hint: "2 of 4" },
+      { id: "warehouse_isolation", text: "Should some users only see data for their specific warehouse (not all locations)?", hint: "3 of 4" },
+      { id: "po_email_contacts", text: "Does the seller want designated contacts to receive PO emails per warehouse location?", hint: "4 of 4" },
+    ];
+
+    const getRoles = (a) => [
+      {
+        name: "Seller Admin",
+        include: true,
+        reason: "Always required. Full account-level access across all warehouses" + (a.need_sp_access === "Yes" ? ", including viewing and accepting offers in the Seller Portal" : "") + ".",
+      },
+      {
+        name: "Warehouse Manager",
+        include: a.multi_warehouse === "Yes" && a.warehouse_isolation === "Yes",
+        reason:
+          a.multi_warehouse !== "Yes"
+            ? "Not needed — seller operates a single warehouse location."
+            : a.warehouse_isolation !== "Yes"
+            ? "Not needed — no requirement to restrict access by warehouse."
+            : "Recommended. Limits access to assigned warehouse(s) only — can manage listings, orders, shipments, and disputes for their location.",
+      },
+      {
+        name: "Warehouse Contact",
+        include: a.po_email_contacts === "Yes",
+        reason:
+          a.po_email_contacts === "Yes"
+            ? "Recommended. Receives PO emails for their warehouse location. Note: requires the send-purchase-order-email-to-location feature flag to be enabled. No Seller Portal access."
+            : "Not needed — PO emails will go to Seller Admins and Warehouse Managers by default.",
+      },
+    ];
+
+    function App() {
+      const [step, setStep] = useState(0);
+      const [answers, setAnswers] = useState({});
+      const [done, setDone] = useState(false);
+
+      const q = questions[step];
+      const sel = answers[q?.id];
+      const pct = Math.round((step / questions.length) * 100);
+
+      const choose = (val) => setAnswers((prev) => ({ ...prev, [q.id]: val }));
+      const next = () => { if (step < questions.length - 1) setStep(step + 1); else setDone(true); };
+      const back = () => { if (step > 0) setStep(step - 1); };
+      const restart = () => { setAnswers({}); setStep(0); setDone(false); };
+
+      const result = getRoles(answers);
+
+      const cardStyle = { background: "#fff", borderRadius: 16, border: "1px solid #E8E8E4", padding: "1.75rem", marginBottom: "1rem", width: "100%", maxWidth: 480 };
+
+      return (
+        <div style={{ width: "100%", maxWidth: 480 }}>
+          <div style={{ marginBottom: "1.5rem" }}>
+            <p style={{ fontSize: 13, color: "#888", margin: "0 0 4px", fontWeight: 500, letterSpacing: "0.02em", textTransform: "uppercase" }}>Seller Role Advisor</p>
+            <p style={{ fontSize: 22, fontWeight: 600, color: "#1a1a1a", margin: 0 }}>What roles does this storefront need?</p>
+          </div>
+
+          {!done ? (
+            <div style={cardStyle}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
+                <span style={{ fontSize: 12, color: "#aaa" }}>Question {q.hint}</span>
+                <span style={{ fontSize: 12, color: "#aaa" }}>{pct}%</span>
+              </div>
+              <div style={{ height: 4, background: "#F0EFE8", borderRadius: 2, marginBottom: "1.5rem" }}>
+                <div style={{ height: 4, background: "#185FA5", borderRadius: 2, width: pct + "%", transition: "width 0.3s" }} />
+              </div>
+
+              <p style={{ fontSize: 17, fontWeight: 500, color: "#1a1a1a", margin: "0 0 1.5rem", lineHeight: 1.5 }}>{q.text}</p>
+
+              <div style={{ display: "flex", gap: 10, marginBottom: "1.75rem" }}>
+                {["Yes", "No"].map(opt => (
+                  <button key={opt} onClick={() => choose(opt)} style={{
+                    flex: 1, padding: "12px 0", borderRadius: 10, fontSize: 15, fontWeight: 500, cursor: "pointer",
+                    background: sel === opt ? "#185FA5" : "#fff",
+                    color: sel === opt ? "#fff" : "#333",
+                    border: sel === opt ? "1.5px solid #185FA5" : "1px solid #ddd",
+                  }}>{opt}</button>
+                ))}
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <button onClick={back} disabled={step === 0} style={{ padding: "10px 20px", borderRadius: 8, border: "1px solid #ddd", background: "transparent", color: step === 0 ? "#ccc" : "#555", fontSize: 14, cursor: step === 0 ? "default" : "pointer" }}>Back</button>
+                <button onClick={next} disabled={!sel} style={{ padding: "10px 24px", borderRadius: 8, border: "none", background: sel ? "#185FA5" : "#c8d8ec", color: "#fff", fontSize: 14, fontWeight: 500, cursor: sel ? "pointer" : "default" }}>
+                  {step < questions.length - 1 ? "Next" : "See recommendation"}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div style={{ width: "100%", maxWidth: 480 }}>
+              <div style={cardStyle}>
+                <p style={{ fontSize: 13, color: "#888", margin: "0 0 4px", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.02em" }}>Recommended setup</p>
+                <p style={{ fontSize: 18, fontWeight: 600, color: "#1a1a1a", margin: "0 0 1.25rem" }}>Roles for this storefront</p>
+                {result.map(r => (
+                  <div key={r.name} style={{ borderRadius: 10, padding: "1rem 1.25rem", marginBottom: "0.75rem", background: r.include ? "#EAF3DE" : "#F4F4F0", border: `1px solid ${r.include ? "#97C459" : "#D3D1C7"}` }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
+                      <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 9px", borderRadius: 99, background: r.include ? "#C0DD97" : "#D3D1C7", color: r.include ? "#27500A" : "#5F5E5A" }}>
+                        {r.include ? "INCLUDE" : "SKIP"}
+                      </span>
+                      <span style={{ fontSize: 15, fontWeight: 600, color: r.include ? "#27500A" : "#5F5E5A" }}>{r.name}</span>
+                    </div>
+                    <p style={{ fontSize: 13, color: r.include ? "#3B6D11" : "#888780", margin: 0, lineHeight: 1.5 }}>{r.reason}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ ...cardStyle, padding: "1.25rem 1.75rem" }}>
+                <p style={{ fontSize: 13, fontWeight: 500, color: "#888", margin: "0 0 0.75rem", textTransform: "uppercase", letterSpacing: "0.02em" }}>Your answers</p>
+                {questions.map(q => (
+                  <div key={q.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "6px 0", borderBottom: "1px solid #F0EFE8" }}>
+                    <span style={{ fontSize: 13, color: "#555", flex: 1, paddingRight: 12, lineHeight: 1.4 }}>{q.text}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: answers[q.id] === "Yes" ? "#185FA5" : "#888" }}>{answers[q.id]}</span>
+                  </div>
+                ))}
+              </div>
+
+              <button onClick={restart} style={{ width: "100%", padding: "12px", borderRadius: 10, border: "1px solid #ddd", background: "#fff", color: "#333", fontSize: 14, fontWeight: 500, cursor: "pointer" }}>
+                Start over
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
