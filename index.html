@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.7">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="en"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;Seller Role Advisor&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script src="https://unpkg.com/react@18/umd/react.production.min.js"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script src="https://unpkg.com/@babel/standalone/babel.min.js"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F8F8F6; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="root"&gt;&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script type="text/babel"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const { useState } = React;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const questions = [</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{ id: "multi_warehouse", text: "Does this seller operate multiple warehouse locations?", hint: "1 of 4" },</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{ id: "need_sp_access", text: "Does the seller need users who can view and accept offers in the Seller Portal?", hint: "2 of 4" },</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{ id: "warehouse_isolation", text: "Should some users only see data for their specific warehouse (not all locations)?", hint: "3 of 4" },</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{ id: "po_email_contacts", text: "Does the seller want designated contacts to receive PO emails per warehouse location?", hint: "4 of 4" },</p>
+<p class="p1"><span class="Apple-converted-space">    </span>];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const getRoles = (a) =&gt; [</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{</p>
+<p class="p1"><span class="Apple-converted-space">        </span>name: "Seller Admin",</p>
+<p class="p1"><span class="Apple-converted-space">        </span>include: true,</p>
+<p class="p1"><span class="Apple-converted-space">        </span>reason: "Always required. Full account-level access across all warehouses" + (a.need_sp_access === "Yes" ? ", including viewing and accepting offers in the Seller Portal" : "") + ".",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>},</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{</p>
+<p class="p1"><span class="Apple-converted-space">        </span>name: "Warehouse Manager",</p>
+<p class="p1"><span class="Apple-converted-space">        </span>include: a.multi_warehouse === "Yes" &amp;&amp; a.warehouse_isolation === "Yes",</p>
+<p class="p1"><span class="Apple-converted-space">        </span>reason:</p>
+<p class="p1"><span class="Apple-converted-space">          </span>a.multi_warehouse !== "Yes"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>? "Not needed — seller operates a single warehouse location."</p>
+<p class="p1"><span class="Apple-converted-space">            </span>: a.warehouse_isolation !== "Yes"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>? "Not needed — no requirement to restrict access by warehouse."</p>
+<p class="p1"><span class="Apple-converted-space">            </span>: "Recommended. Limits access to assigned warehouse(s) only — can manage listings, orders, shipments, and disputes for their location.",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>},</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{</p>
+<p class="p1"><span class="Apple-converted-space">        </span>name: "Warehouse Contact",</p>
+<p class="p1"><span class="Apple-converted-space">        </span>include: a.po_email_contacts === "Yes",</p>
+<p class="p1"><span class="Apple-converted-space">        </span>reason:</p>
+<p class="p1"><span class="Apple-converted-space">          </span>a.po_email_contacts === "Yes"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>? "Recommended. Receives PO emails for their warehouse location. Note: requires the send-purchase-order-email-to-location feature flag to be enabled. No Seller Portal access."</p>
+<p class="p1"><span class="Apple-converted-space">            </span>: "Not needed — PO emails will go to Seller Admins and Warehouse Managers by default.",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>},</p>
+<p class="p1"><span class="Apple-converted-space">    </span>];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function App() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const [step, setStep] = useState(0);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const [answers, setAnswers] = useState({});</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const [done, setDone] = useState(false);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const q = questions[step];</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const sel = answers[q?.id];</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const pct = Math.round((step / questions.length) * 100);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const choose = (val) =&gt; setAnswers((prev) =&gt; ({ ...prev, [q.id]: val }));</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const next = () =&gt; { if (step &lt; questions.length - 1) setStep(step + 1); else setDone(true); };</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const back = () =&gt; { if (step &gt; 0) setStep(step - 1); };</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const restart = () =&gt; { setAnswers({}); setStep(0); setDone(false); };</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const result = getRoles(answers);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const cardStyle = { background: "#fff", borderRadius: 16, border: "1px solid #E8E8E4", padding: "1.75rem", marginBottom: "1rem", width: "100%", maxWidth: 480 };</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div style={{ width: "100%", maxWidth: 480 }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div style={{ marginBottom: "1.5rem" }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;p style={{ fontSize: 13, color: "#888", margin: "0 0 4px", fontWeight: 500, letterSpacing: "0.02em", textTransform: "uppercase" }}&gt;Seller Role Advisor&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;p style={{ fontSize: 22, fontWeight: 600, color: "#1a1a1a", margin: 0 }}&gt;What roles does this storefront need?&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">          </span>{!done ? (</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div style={cardStyle}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span style={{ fontSize: 12, color: "#aaa" }}&gt;Question {q.hint}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span style={{ fontSize: 12, color: "#aaa" }}&gt;{pct}%&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div style={{ height: 4, background: "#F0EFE8", borderRadius: 2, marginBottom: "1.5rem" }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div style={{ height: 4, background: "#185FA5", borderRadius: 2, width: pct + "%", transition: "width 0.3s" }} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;p style={{ fontSize: 17, fontWeight: 500, color: "#1a1a1a", margin: "0 0 1.5rem", lineHeight: 1.5 }}&gt;{q.text}&lt;/p&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div style={{ display: "flex", gap: 10, marginBottom: "1.75rem" }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{["Yes", "No"].map(opt =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;button key={opt} onClick={() =&gt; choose(opt)} style={{</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>flex: 1, padding: "12px 0", borderRadius: 10, fontSize: 15, fontWeight: 500, cursor: "pointer",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>background: sel === opt ? "#185FA5" : "#fff",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>color: sel === opt ? "#fff" : "#333",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>border: sel === opt ? "1.5px solid #185FA5" : "1px solid #ddd",</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>}}&gt;{opt}&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div style={{ display: "flex", justifyContent: "space-between" }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button onClick={back} disabled={step === 0} style={{ padding: "10px 20px", borderRadius: 8, border: "1px solid #ddd", background: "transparent", color: step === 0 ? "#ccc" : "#555", fontSize: 14, cursor: step === 0 ? "default" : "pointer" }}&gt;Back&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button onClick={next} disabled={!sel} style={{ padding: "10px 24px", borderRadius: 8, border: "none", background: sel ? "#185FA5" : "#c8d8ec", color: "#fff", fontSize: 14, fontWeight: 500, cursor: sel ? "pointer" : "default" }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>{step &lt; questions.length - 1 ? "Next" : "See recommendation"}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>) : (</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div style={{ width: "100%", maxWidth: 480 }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div style={cardStyle}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p style={{ fontSize: 13, color: "#888", margin: "0 0 4px", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.02em" }}&gt;Recommended setup&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p style={{ fontSize: 18, fontWeight: 600, color: "#1a1a1a", margin: "0 0 1.25rem" }}&gt;Roles for this storefront&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{result.map(r =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div key={r.name} style={{ borderRadius: 10, padding: "1rem 1.25rem", marginBottom: "0.75rem", background: r.include ? "#EAF3DE" : "#F4F4F0", border: `1px solid ${r.include ? "#97C459" : "#D3D1C7"}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;span style={{ fontSize: 11, fontWeight: 600, padding: "2px 9px", borderRadius: 99, background: r.include ? "#C0DD97" : "#D3D1C7", color: r.include ? "#27500A" : "#5F5E5A" }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>{r.include ? "INCLUDE" : "SKIP"}</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;span style={{ fontSize: 15, fontWeight: 600, color: r.include ? "#27500A" : "#5F5E5A" }}&gt;{r.name}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;p style={{ fontSize: 13, color: r.include ? "#3B6D11" : "#888780", margin: 0, lineHeight: 1.5 }}&gt;{r.reason}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div style={{ ...cardStyle, padding: "1.25rem 1.75rem" }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p style={{ fontSize: 13, fontWeight: 500, color: "#888", margin: "0 0 0.75rem", textTransform: "uppercase", letterSpacing: "0.02em" }}&gt;Your answers&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{questions.map(q =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div key={q.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "6px 0", borderBottom: "1px solid #F0EFE8" }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;span style={{ fontSize: 13, color: "#555", flex: 1, paddingRight: 12, lineHeight: 1.4 }}&gt;{q.text}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;span style={{ fontSize: 13, fontWeight: 600, color: answers[q.id] === "Yes" ? "#185FA5" : "#888" }}&gt;{answers[q.id]}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;button onClick={restart} style={{ width: "100%", padding: "12px", borderRadius: 10, border: "1px solid #ddd", background: "#fff", color: "#333", fontSize: 14, fontWeight: 500, cursor: "pointer" }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>Start over</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>ReactDOM.createRoot(document.getElementById("root")).render(&lt;App /&gt;);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
